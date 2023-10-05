@@ -1,0 +1,253 @@
+<div class="container">
+  <h1>Courses</h1>
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="searchTerm"
+        placeholder="Search by keyword"
+      />
+    </div>
+
+    <div class="col-md-6 text-md-end">
+      <button class="btn btn-primary" (click)="openAddCourseModal(courseModal)">
+        Add Course
+      </button>
+    </div>
+  </div>
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status"></div>
+  </div>
+  <table class="table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Index</th>
+        <th>Name</th>
+        <th>Field</th>
+        <th>lab</th>
+        <th>Credit Hours</th>
+        <th>Student Count</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <!-- If the filteredData length is 0 show a Text that no records found -->
+    <tbody *ngIf="filteredData.length === 0">
+      <tr>
+        <td colspan="5" class="text-center">No records found</td>
+      </tr>
+    </tbody>
+    <tbody *ngIf="filteredData.length > 0">
+      <tr *ngFor="let course of filteredData; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ course.name }}</td>
+        <td>{{ course.field }}</td>
+        <td>{{ course.lab }}</td>
+        <td>{{ course.credit_hours }}</td>
+        <td>{{ course.student_count }}</td>
+        <td>
+          <button
+            class="btn btn-sm btn-primary me-2 mb-2"
+            (click)="onOpenViewCourseModal(courseViewModal, course.id)"
+          >
+            View
+          </button>
+          <button
+            class="btn btn-sm btn-info me-2 mb-2"
+            (click)="editCourse(course.id, courseModal)"
+          >
+            Edit
+          </button>
+          <button
+            class="btn btn-sm btn-danger mb-2"
+            (click)="deleteCourse(course.id)"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #courseModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">
+        {{ isEditMode ? "Edit Course" : "Add Course" }}
+      </h4>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="onCourseModalClose()"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="courseForm">
+        <div class="form-group">
+          <label for="name" class="bold">Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            formControlName="name"
+          />
+          <div
+            *ngIf="
+              courseForm.get('name')?.invalid && courseForm.get('name')?.touched
+            "
+            class="invalid-feedback"
+          >
+            Name is required
+          </div>
+        </div>
+        <!-- I also want to get the value of field when I click Edut  -->
+        <!-- How to give default value in the select-->
+
+        <div class="form-group">
+          <label for="field" class="bold">Field</label>
+          <select class="form-control" id="field" formControlName="field">
+            <option
+              *ngFor="let field of sortedFields"
+              [value]="field"
+              [selected]="courseField === field.toLowerCase()"
+            >
+              {{ field }}
+            </option>
+          </select>
+        </div>
+        <div
+          *ngIf="
+            courseForm.get('field')?.invalid && courseForm.get('field')?.touched
+          "
+          class="invalid-feedback"
+        >
+          Field is required
+        </div>
+        <!-- <div class="form-group">
+          <label for="field" class="bold">Field</label>
+          <input
+            type="text"
+            class="form-control"
+            id="field"
+            formControlName="field"
+          />
+          <div>
+            <span
+              *ngIf="
+                courseForm.get('field')?.invalid &&
+                courseForm.get('field')?.touched
+              "
+              class="invalid-feedback"
+            >
+              Field is required</span
+            >
+          </div>
+        </div> -->
+        <div class="form-group">
+          <label for="credit_hours" class="bold">Credit Hours</label>
+          <input
+            type="number"
+            class="form-control"
+            id="credit_hours"
+            formControlName="credit_hours"
+          />
+          <div
+            *ngIf="
+              courseForm.get('credit_hours')?.invalid &&
+              courseForm.get('credit_hours')?.touched
+            "
+            class="invalid-feedback"
+          >
+            Credit Hours is required
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="lab" class="bold"> Lab</label>
+          <input
+            class="ms-5 my-4"
+            type="checkbox"
+            id="lab"
+            formControlName="lab"
+          />
+
+          <div
+            *ngIf="
+              courseForm.get('lab')?.invalid && courseForm.get('lab')?.touched
+            "
+            class="invalid-feedback"
+          >
+            Lab is required
+          </div>
+        </div>
+
+        <!-- <div class="row">
+          <label for="address" class="bold">Courses</label>
+          <div class="col-sm-6 col-md-4" *ngFor="let course of courses">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="checkCourse(course.id)"
+                (change)="onCourseSelect(course.id)"
+                name="{{ course.name }}"
+                value="{{ course.id }}"
+              />
+              {{ course.name }}
+            </label>
+          </div>
+        </div> -->
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="onCourseModalClose()"
+          >
+            Close
+          </button>
+          <button
+            [disabled]="courseForm.invalid"
+            class="btn btn-primary"
+            (click)="isEditMode ? onUpdate(courseId) : onSubmit()"
+          >
+            {{ isEditMode ? "Update" : "Save changes" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </ng-template>
+  <ng-template #courseViewModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">Course</h4>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="onCourseViewModalClose()"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- I need Row with two columns which should be one on mobile screen col-sm-12 -->
+      <div class="row">
+        <div class="col-sm-12 col-md-6 my-3">
+          <h5 class="card-title">Name</h5>
+          <p class="card-text">{{ courseInfo.name }}</p>
+        </div>
+        <div class="col-sm-12 col-md-6 my-3">
+          <h5 class="card-title">Field</h5>
+          <p class="card-text">{{ courseInfo.field }}</p>
+        </div>
+        <div class="col-sm-12 col-md-6 my-3">
+          <h5 class="card-title">Credit Hours</h5>
+          <p class="card-text">{{ courseInfo.credit_hours }}</p>
+        </div>
+        <div class="col-sm-12 col-md-6 my-3">
+          <h5 class="card-title">lab</h5>
+          <p class="card-text">{{ courseInfo.lab }}</p>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</div>

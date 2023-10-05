@@ -1,0 +1,258 @@
+<div class="container">
+  <h1>Students</h1>
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="searchTerm"
+        placeholder="Search by keyword"
+      />
+    </div>
+
+    <div class="col-md-6 text-md-end">
+      <button
+        class="btn btn-primary"
+        (click)="openAddStudentModal(studentModal)"
+      >
+        Add Student
+      </button>
+    </div>
+  </div>
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status"></div>
+  </div>
+  <table class="table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Index</th>
+        <th>Name</th>
+        <th>age</th>
+        <th>Course Count</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <!-- If the filteredData length is 0 show a Text that no records found -->
+    <tbody *ngIf="filteredData.length === 0">
+      <tr>
+        <td colspan="5" class="text-center">No records found</td>
+      </tr>
+    </tbody>
+    <tbody *ngIf="filteredData.length > 0">
+      <tr *ngFor="let student of filteredData; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ student.age }}</td>
+        <td>{{ student.course_count }}</td>
+        <td>
+          <button
+            class="btn btn-sm btn-primary me-2 mb-2"
+            (click)="onOpenViewStudentModal(studentViewModal, student.id)"
+          >
+            View
+          </button>
+          <button
+            class="btn btn-sm btn-info me-2 mb-2"
+            (click)="editStudent(student.id, studentModal)"
+          >
+            Edit
+          </button>
+          <button
+            class="btn btn-sm btn-danger mb-2"
+            (click)="deleteStudent(student.id)"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #studentModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">
+        {{ isEditMode ? "Edit Student" : "Add Student" }}
+      </h4>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="onStudentModalClose()"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="studentForm">
+        <div class="form-group">
+          <label for="name" class="bold">Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            formControlName="name"
+          />
+          <div
+            *ngIf="
+              studentForm.get('name')?.invalid &&
+              studentForm.get('name')?.touched
+            "
+            class="invalid-feedback"
+          >
+            Name is required
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email" class="bold">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            formControlName="email"
+          />
+          <div>
+            <span
+              *ngIf="
+                studentForm.get('email')?.invalid &&
+                studentForm.get('email')?.touched
+              "
+              class="invalid-feedback"
+            >
+              Correct Email Format is required</span
+            >
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cell_number" class="bold">Cell Number</label>
+          <input
+            type="text"
+            class="form-control"
+            id="cell_number"
+            formControlName="cell_number"
+          />
+          <div
+            *ngIf="
+              studentForm.get('cell_number')?.invalid &&
+              studentForm.get('cell_number')?.touched
+            "
+            class="invalid-feedback"
+          >
+            Cell Number is required
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="age" class="bold"> Age</label>
+          <input
+            type="number"
+            class="form-control"
+            id="age"
+            formControlName="age"
+          />
+          <div
+            *ngIf="
+              studentForm.get('age')?.invalid && studentForm.get('age')?.touched
+            "
+            class="invalid-feedback"
+          >
+            Age is required
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="address" class="bold">Address</label>
+          <input
+            type="text"
+            class="form-control"
+            id="address"
+            formControlName="address"
+          />
+          <div
+            *ngIf="
+              studentForm.get('address')?.invalid &&
+              studentForm.get('address')?.touched
+            "
+            class="invalid-feedback"
+          >
+            Address is required
+          </div>
+        </div>
+        <div class="row">
+          <label for="address" class="bold">Courses</label>
+          <div class="col-sm-6 col-md-4" *ngFor="let course of courses">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="checkCourse(course.id)"
+                (change)="onCourseSelect(course.id)"
+                name="{{ course.name }}"
+                value="{{ course.id }}"
+              />
+              {{ course.name }}
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="onStudentModalClose()"
+          >
+            Close
+          </button>
+          <button
+            [disabled]="studentForm.invalid"
+            class="btn btn-primary"
+            (click)="isEditMode ? onUpdate(studentId) : onSubmit()"
+          >
+            {{ isEditMode ? "Update" : "Save changes" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </ng-template>
+  <ng-template #studentViewModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">Student</h4>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="onStudentViewModalClose()"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- I need Row with two columns which should be one on mobile screen col-sm-12 -->
+      <div class="row">
+        <div class="col-sm-12 col-md-6">
+          <h5 class="card-title">Name</h5>
+          <p class="card-text">{{ studentInfo.name }}</p>
+        </div>
+        <div class="col-sm-12 col-md-6">
+          <h5 class="card-title">Email</h5>
+          <p class="card-text">{{ studentInfo.email }}</p>
+        </div>
+        <div class="col-sm-12 col-md-6">
+          <h5 class="card-title">Cell Number</h5>
+          <p class="card-text">{{ studentInfo.cell_number }}</p>
+        </div>
+        <div class="col-sm-12 col-md-6">
+          <h5 class="card-title">Age</h5>
+          <p class="card-text">{{ studentInfo.age }}</p>
+        </div>
+        <div class="col-sm-12">
+          <h5 class="card-title">Address</h5>
+          <p class="card-text">{{ studentInfo.address }}</p>
+        </div>
+        <div class="col-sm-12 col-md-6">
+          <div class="">
+            <h5 class="card-title">Courses</h5>
+            <div *ngFor="let course of studentInfo.courses">
+              <li>{{ course.name }}</li>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,43 @@
+.container {
+  margin-top: 2rem;
+}
+
+table {
+  margin: 0 auto;
+}
+
+table th {
+  text-align: center;
+}
+
+table td {
+  cursor: pointer;
+  text-align: center;
+}
+.bold {
+  font-weight: bold;
+}
+.invalid-feedback {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 80%;
+  color: #dc3545;
+}
+.close {
+  cursor: pointer;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  opacity: 0.5;
+  border: 0;
+  background-color: transparent;
+}
+@media (max-width: 576px) {
+  .col-md-6 {
+    margin-bottom: 1rem;
+  }
+  .text-md-end {
+    text-align: center !important;
+  }
+}
